@@ -1,0 +1,78 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+model Player {
+  id            Int       @id @default(autoincrement())
+  name          String
+  age           Int
+  positionFocus String    @default("3/4/5")
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  sessions      Session[]
+  goals         Goal[]
+}
+
+model Session {
+  id                    Int      @id @default(autoincrement())
+  playerId              Int
+  sessionDate           DateTime
+  durationMinutes       Int?
+  leftHandControl       Float
+  rightHandControl      Float
+  formShooting          Float
+  guideHand             Float
+  freeThrowsMade        Int
+  freeThrowsAttempted   Int
+  spotShootingMade      Int
+  spotShootingAttempted Int
+  closeRangeMade        Int
+  closeRangeAttempted   Int
+  stopPopSpeed          Float
+  footwork              Float
+  bigPlayerSkill        Float
+  confidence            Float
+  coachNotes            String?  @db.Text
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  player                Player   @relation(fields: [playerId], references: [id])
+  drillCompletions      SessionDrillCompletion[]
+}
+
+model Goal {
+  id            Int       @id @default(autoincrement())
+  playerId      Int
+  metricName    String
+  baselineValue Float
+  targetValue   Float
+  targetDate    DateTime?
+  createdAt     DateTime  @default(now())
+  player        Player    @relation(fields: [playerId], references: [id])
+}
+
+model DrillChecklistItem {
+  id          Int    @id @default(autoincrement())
+  drillName   String
+  category    String
+  targetReps  String?
+  description String? @db.Text
+  completions SessionDrillCompletion[]
+}
+
+model SessionDrillCompletion {
+  id          Int                @id @default(autoincrement())
+  sessionId   Int?
+  drillId     Int
+  date        String
+  completed   Boolean            @default(false)
+  notes       String?            @db.Text
+  createdAt   DateTime           @default(now())
+  session     Session?           @relation(fields: [sessionId], references: [id])
+  drill       DrillChecklistItem @relation(fields: [drillId], references: [id])
+}
