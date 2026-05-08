@@ -84,13 +84,13 @@ async function main() {
   const player = await prisma.player.upsert({
     where: { id: 1 },
     update: {
-      name: 'Marcus',
+      name: 'David Trim',
       age: 13,
       positionFocus: '3/4/5',
       notes: '13U player focused on big-man skill development, weak-hand control, and shooting mechanics.',
     },
     create: {
-      name: 'Marcus',
+      name: 'David Trim',
       age: 13,
       positionFocus: '3/4/5',
       notes: '13U player focused on big-man skill development, weak-hand control, and shooting mechanics.',
