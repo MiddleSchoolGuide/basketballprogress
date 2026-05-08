@@ -5,7 +5,7 @@ A mobile-first web app for tracking 13U basketball player development: skill rat
 ## Stack
 
 - **Next.js 14** (App Router, TypeScript)
-- **Prisma + SQLite** (local prototype; swap to PostgreSQL for production)
+- **Prisma + PostgreSQL**
 - **Tailwind CSS** (dark navy + orange theme)
 - **Recharts** (line, bar, progress charts)
 - **Lucide React** (icons)
@@ -16,13 +16,14 @@ A mobile-first web app for tracking 13U basketball player development: skill rat
 # 1. Install dependencies
 npm install
 
-# 2. Push database schema
+# 2. Set DATABASE_URL in .env.local
+# 3. Push database schema
 npm run db:push
 
-# 3. Seed with baseline player + 5 sample sessions
+# 4. Seed with baseline player + 5 sample sessions
 npm run db:seed
 
-# 4. Start dev server
+# 5. Start dev server
 npm run dev
 ```
 
@@ -34,8 +35,8 @@ Open [http://localhost:3000](http://localhost:3000)
 |---|---|
 | `npm run dev` | Start dev server |
 | `npm run build` | Production build |
-| `npm run db:push` | Sync Prisma schema to SQLite |
-| `npm run db:seed` | Seed player, goals, sample sessions, drills |
+| `npm run db:push` | Sync Prisma schema to the configured database |
+| `npm run db:seed` | Seed or reseed the baseline player, goals, drills, and sample sessions |
 | `npm run db:studio` | Open Prisma Studio (visual DB editor) |
 
 ## Pages
@@ -75,13 +76,51 @@ Weighted 0–100 score across 7 metrics:
 ## Environment
 
 ```env
-DATABASE_URL="file:./prisma/dev.db"
+DATABASE_URL="postgresql://user:password@host:5432/dbname?sslmode=require"
 ```
+
+## Railway Deployment
+
+1. Create a Railway project from this repository.
+2. Add a PostgreSQL service in Railway.
+3. Set the app service `DATABASE_URL` variable from the PostgreSQL connection string.
+4. This repo includes [`railway.json`](</abs/path/C:/Users/sidep/WebstormProjects/basketball_progress/railway.json>) so Railway uses:
+   - Build: `npm run build`
+   - Start: `npm start`
+5. Deploy once so Railway runs `prisma migrate deploy` during the build.
+6. Seed the database once after the first successful deploy with:
+   ```bash
+   npm run db:seed
+   ```
+
+If you prefer to configure Railway by hand instead of relying on `railway.json`, use the same build and start commands above.
+
+The seed flow is rerunnable. It updates player `id=1` and replaces the baseline seeded goals, drills, and sample sessions so repeated runs do not accumulate duplicates.
+
+## Android Client Configuration
+
+The Android app in `Basketballhelp` expects this service to expose:
+
+- `GET /api/players`
+- `POST /api/players`
+- `GET /api/players/{id}`
+- `PUT /api/players/{id}`
+- `GET /api/sessions?playerId=1`
+- `GET /api/sessions?playerId=1&limit=n`
+- `POST /api/sessions`
+- `GET /api/sessions/{id}`
+- `PUT /api/sessions/{id}`
+- `DELETE /api/sessions/{id}`
+- `GET /api/goals?playerId=1`
+- `POST /api/goals`
+- `GET /api/drills?date=yyyy-MM-dd`
+- `POST /api/drills`
+
+Point the Android app's `HOOP_DEV_BASE_URL` at the deployed Railway URL with a trailing slash.
 
 ## Extending
 
 - **Multiple players**: The schema supports multiple players. Update API calls to use a player selector.
-- **PostgreSQL**: Change `provider = "sqlite"` to `"postgresql"` in `prisma/schema.prisma` and update `DATABASE_URL`.
 - **Auth**: Add NextAuth.js for coach/parent accounts.
 - **Video links**: Add a `videoUrl` field to the `Session` model.
 - **Drill library**: Expand `DrillChecklistItem` with difficulty, video, and phase fields.
