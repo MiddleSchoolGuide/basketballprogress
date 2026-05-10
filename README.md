@@ -77,6 +77,8 @@ Weighted 0–100 score across 7 metrics:
 
 ```env
 DATABASE_URL="postgresql://user:password@host:5432/dbname?sslmode=require"
+OPENAI_API_KEY="your_openai_api_key"
+OPENAI_MODEL="gpt-4o-mini"
 ```
 
 ## Railway Deployment
@@ -115,6 +117,7 @@ The Android app in `Basketballhelp` expects this service to expose:
 - `POST /api/goals`
 - `GET /api/drills?date=yyyy-MM-dd`
 - `POST /api/drills`
+- `POST /api/ai/practice-plan`
 
 Point the Android app's `HOOP_DEV_BASE_URL` at the deployed Railway URL with a trailing slash.
 
